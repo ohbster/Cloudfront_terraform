@@ -41,9 +41,10 @@ resource "aws_s3_bucket_website_configuration" "website_configuration" {
   index_document {
     suffix = "index.html"
   }
+  depends_on = [ aws_s3_bucket.content_bucket ]
 }
 
-resource "aws_s3_bucket_policy" "policy" {
+resource "aws_s3_bucket_policy" "cloudfront_bucket_policy" {
   
   bucket = aws_s3_bucket.content_bucket.id
   policy = jsonencode({
@@ -58,4 +59,5 @@ resource "aws_s3_bucket_policy" "policy" {
         }
     ]
 })
+depends_on = [ aws_s3_bucket.content_bucket ]
 }
