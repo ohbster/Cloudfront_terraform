@@ -1,0 +1,46 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+- main
+
+pool:
+  vmImage: ubuntu-latest
+
+stages:
+
+- stage:
+  displayName: Initialize Terraform
+  jobs:
+  - job: InstallTerraform
+    steps:
+    - task: TerraformInstaller@1
+      inputs:
+        terraformVersion: 'latest'
+      displayName: 'Install terraform'
+    - task: TerraformTaskV4@4
+      inputs:
+        provider: 'aws'
+        command: 'init'
+        backendServiceAWS: '(Project 2) AWS for Terraform'
+        backendAWSBucketName: 'ohbster-project2-ado-terraform'
+        backendAWSKey: 'dev/terraform.tfstate'
+      displayName: 'Initialize terraform'
+    - task: TerraformTaskV4@4
+      inputs:
+        provider: 'aws'
+        command: 'apply'
+        commandOptions: '--auto-approve'
+        environmentServiceNameAWS: '(Project 2) AWS for Terraform'
+      displayName: 'Apply terraform'
+# - stage:
+#   displayName: SAST
+#   jobs:
+#   - job: SecurityScan    
+#     steps:
+#     - task: tfsec@1
+#       inputs:
+#         version: 'v1.26.0'
+#         debug: true

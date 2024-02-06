@@ -4,9 +4,9 @@
 -create cloudfront distribution
 -create origin access controll
 -create policy
-custom SSL certificate
-Add Alternate domain name(CNAME)
-allowed HTTP methods (GET,HEAD)
+-custom SSL certificate
+-Add Alternate domain name(CNAME)
+-allowed HTTP methods (GET,HEAD)
 cache policy and origin 
 cachingOptimized
 price class(NA and EU only)
@@ -145,7 +145,7 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
 #     viewer_protocol_policy = "redirect-to-https"
 #   }
 
-  price_class = "PriceClass_200"
+  price_class = "PriceClass_100"
 
   restrictions {
     geo_restriction {
@@ -154,12 +154,9 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
     }
   }
 
-  tags = {
-    Environment = "production"
-  }
+  tags = var.common_tags
 
   viewer_certificate {
-    #cloudfront_default_certificate = true
     acm_certificate_arn = aws_acm_certificate.certificate.arn
     ssl_support_method = "sni-only"
     minimum_protocol_version = "TLSv1.2_2021"
@@ -185,7 +182,6 @@ resource "aws_s3_bucket_policy" "policy" {
                 "Resource": "${aws_s3_bucket.content_bucket.arn}/*",
                 "Condition": {
                     "StringEquals": {
-                      # "AWS:SourceArn": "arn:aws:cloudfront::378576100664:distribution/E2JKKQIEP5DV3O"
                       "AWS:SourceArn": "${aws_cloudfront_distribution.s3_distribution.arn}"
                       
                     }
@@ -193,18 +189,6 @@ resource "aws_s3_bucket_policy" "policy" {
             }
         ]
       }
-#     {
-#     "Version": "2012-10-17",
-#     "Statement": [
-#         {
-#             "Sid": "PublicReadGetObject",
-#             "Effect": "Allow",
-#             "Principal": "*",
-#             "Action": "s3:GetObject",
-#             "Resource": "${aws_s3_bucket.bucket.arn}/*"
-#         }
-#     ]
-# }
 )
 depends_on = [ aws_cloudfront_distribution.s3_distribution ]
 }
