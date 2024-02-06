@@ -12,28 +12,32 @@ provider "aws" {
 terraform {
   backend "s3" {
     bucket = "ohbster-ado-terraform-class5"
-    key    = "demo/terraform.tfstate"
+    key    = "cloudfront/terraform.tfstate"
     region = "us-east-1"
   }
 }
 
-resource "aws_s3_bucket" "bucket" {
+resource "aws_s3_bucket" "content_bucket" {
   force_destroy = true
-  bucket = "ohbster-ado-demo"
+  bucket = "${var.name}-static"
+}
+resource "aws_s3_bucket" "logging_bucket" {
+  force_destroy = true
+  bucket = "${var.name}-logging"
 }
 
-resource "aws_s3_bucket_public_access_block" "s3_public_block" {
-  bucket = aws_s3_bucket.bucket.id
+# resource "aws_s3_bucket_public_access_block" "s3_public_block" {
+#   bucket = aws_s3_bucket.bucket.id
 
-  block_public_acls       = false
-  block_public_policy     = false
-  # ignore_public_acls      = false
-  # restrict_public_buckets = false
-}
+#   block_public_acls       = false
+#   block_public_policy     = false
+#   ignore_public_acls      = false
+#   restrict_public_buckets = false
+# }
 
 
 resource "aws_s3_bucket_website_configuration" "website_configuration" {
-  bucket = aws_s3_bucket.bucket.id
+  bucket = aws_s3_bucket.content_bucket.id
   index_document {
     suffix = "index.html"
   }
@@ -41,7 +45,7 @@ resource "aws_s3_bucket_website_configuration" "website_configuration" {
 
 resource "aws_s3_bucket_policy" "policy" {
   
-  bucket = aws_s3_bucket.bucket.id
+  bucket = aws_s3_bucket.content_bucket.id
   policy = jsonencode({
     "Version": "2012-10-17",
     "Statement": [
@@ -50,7 +54,7 @@ resource "aws_s3_bucket_policy" "policy" {
             "Effect": "Allow",
             "Principal": "*",
             "Action": "s3:GetObject",
-            "Resource": "${aws_s3_bucket.bucket.arn}/*"
+            "Resource": "${aws_s3_bucket.content_bucket.arn}/*"
         }
     ]
 })
