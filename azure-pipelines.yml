@@ -25,7 +25,7 @@ stages:
         provider: 'aws'
         command: 'init'
         backendServiceAWS: '(Cloudfront_Terraform)AWS_for_terrafrom'
-        backendAWSBucketName: 'ohbster-ado-terraform-class5'''
+        backendAWSBucketName: 'ohbster-ado-terraform-class5'
         backendAWSKey: 'cloudfront/terraform.tfstate'
       displayName: 'Initialize terraform'
     - task: TerraformTaskV4@4
