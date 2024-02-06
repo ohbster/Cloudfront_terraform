@@ -60,7 +60,8 @@ resource "aws_cloudfront_origin_access_control" "oac" {
 resource "aws_cloudfront_distribution" "s3_distribution" {
   origin {
     #domain_name              = aws_s3_bucket.b.bucket_regional_domain_name
-    domain_name = "www.goldwatch.link"
+    #domain_name = var.domain_name
+    domain_name = aws_s3_bucket.content_bucket.bucket_regional_domain_name
     origin_access_control_id = aws_cloudfront_origin_access_control.oac.id
     origin_id                = local.s3_origin_id
   }
@@ -70,14 +71,15 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
   comment             = "Some comment"
   default_root_object = "index.html"
 
-  logging_config {
-    include_cookies = false
-    #bucket          = "mylogs.s3.amazonaws.com"
-    bucket = aws_s3_bucket.logging_bucket.bucket
-    prefix          = "cloudfront-logs"
-  }
+#   logging_config {
+#     include_cookies = false
+#     #bucket          = "mylogs.s3.amazonaws.com"
+#     #bucket = "${aws_s3_bucket.logging_bucket.bucket}.s3.amazonaws.com"
+#     bucket = aws_s3_bucket.logging_bucket.bucket_domain_name
+#     prefix          = "cloudfront-logs"
+#   }
 
-  aliases = ["www.goldwatch.link"]
+  aliases = ["${var.domain_name}"]
 
   default_cache_behavior {
     allowed_methods  = ["GET", "HEAD"]
@@ -157,8 +159,12 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
   }
 
   viewer_certificate {
-    cloudfront_default_certificate = true
+    #cloudfront_default_certificate = true
+    acm_certificate_arn = aws_acm_certificate.certificate.arn
+    ssl_support_method = "sni-only"
+    minimum_protocol_version = "TLSv1.2_2021"
   }
+  depends_on = [ aws_s3_bucket.content_bucket,aws_s3_bucket.logging_bucket,aws_acm_certificate.certificate ]
 }
 
 resource "aws_s3_bucket_policy" "policy" {
