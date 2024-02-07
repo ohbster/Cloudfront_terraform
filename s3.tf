@@ -11,7 +11,7 @@ resource "aws_s3_bucket" "logging_bucket" {
   bucket = "${var.name}-logging"
   tags = local.common_tags
 }
-#This section is needed to allow logging
+#This section is needed to allow logging | ISSUE 1
 resource "aws_s3_bucket_ownership_controls" "s3_oc" {
   bucket = aws_s3_bucket.logging_bucket.id
   rule {
