@@ -1,8 +1,5 @@
 resource "aws_acm_certificate" "certificate" {
   domain_name = var.domain_name
-  #   private_key = var.private_key
-  #   certificate_body = var.certificate_body
-
   validation_method = "DNS"
   lifecycle {
     create_before_destroy = true
@@ -29,7 +26,6 @@ resource "aws_route53_record" "record" {
   type            = each.value.type
   zone_id         = data.aws_route53_zone.zone.zone_id
 }
-
 
 resource "aws_acm_certificate_validation" "validation" {
   certificate_arn         = aws_acm_certificate.certificate.arn

@@ -11,6 +11,13 @@ resource "aws_s3_bucket" "logging_bucket" {
   bucket = "${var.name}-logging"
   tags = local.common_tags
 }
+#This section is needed to allow logging
+resource "aws_s3_bucket_ownership_controls" "s3_oc" {
+  bucket = aws_s3_bucket.logging_bucket.id
+  rule {
+    object_ownership = "BucketOwnerPreferred"
+  }
+}
 
 # Not sure if this is needed??
 resource "aws_s3_bucket_website_configuration" "website_configuration" {

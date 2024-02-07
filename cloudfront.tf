@@ -7,9 +7,9 @@
 -custom SSL certificate
 -Add Alternate domain name(CNAME)
 -allowed HTTP methods (GET,HEAD)
-cache policy and origin 
+-cache policy and origin 
 cachingOptimized
-price class(NA and EU only)
+-price class(NA and EU only)
 Supported HTTP (HTTP/2)
 IPv6 off
 
@@ -26,6 +26,7 @@ locals {
     s3_origin_id = "someS3Origin"
 }
 
+#Explore using origin access ID instead.
 resource "aws_cloudfront_origin_access_control" "oac" {
   name                              = "${var.name}-oac"
   description                       = "Example Policy"
@@ -46,11 +47,11 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
   comment             = "Some comment"
   default_root_object = "index.html"
 
-  # logging_config {
-  #   include_cookies = false
-  #   bucket = aws_s3_bucket.logging_bucket.bucket_domain_name
-  #   prefix          = "cloudfront-logs"
-  # }
+  logging_config {
+    include_cookies = false
+    bucket = aws_s3_bucket.logging_bucket.bucket_domain_name
+    prefix          = "cloudfront-logs"
+  }
 
   aliases = ["${var.domain_name}"]
 
