@@ -46,13 +46,11 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
   comment             = "Some comment"
   default_root_object = "index.html"
 
-#   logging_config {
-#     include_cookies = false
-#     #bucket          = "mylogs.s3.amazonaws.com"
-#     #bucket = "${aws_s3_bucket.logging_bucket.bucket}.s3.amazonaws.com"
-#     bucket = aws_s3_bucket.logging_bucket.bucket_domain_name
-#     prefix          = "cloudfront-logs"
-#   }
+  # logging_config {
+  #   include_cookies = false
+  #   bucket = aws_s3_bucket.logging_bucket.bucket_domain_name
+  #   prefix          = "cloudfront-logs"
+  # }
 
   aliases = ["${var.domain_name}"]
 
@@ -125,7 +123,7 @@ depends_on = [ aws_cloudfront_distribution.s3_distribution ]
 
 resource "aws_s3_bucket_policy" "logging_policy" {
   
-  bucket = aws_s3_bucket.content_bucket.id
+  bucket = aws_s3_bucket.logging_bucket.id
   policy = jsonencode(
     {
         "Version": "2008-10-17",
