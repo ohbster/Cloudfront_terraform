@@ -9,6 +9,8 @@ terraform {
 provider "aws" {
   region = "us-east-1"
 }
+
+# Terraform statefile bucket
 terraform {
   backend "s3" {
     bucket = "ohbster-ado-terraform-class5"
@@ -17,3 +19,11 @@ terraform {
   }
 }
 
+#Extra
+#This is used by resource tags. This is will identify all resources that belong to the terraform deployment
+resource "random_uuid" "uuid" {
+}
+
+locals {
+  common_tags = merge(var.common_tags, { mff_id = random_uuid.uuid.result })
+}
