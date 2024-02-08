@@ -12,18 +12,20 @@ pool:
 stages:
 
 - stage:
-  displayName: TFSec Scanning
+  displayName: Security Scanning
   jobs:
   - job:
+    displayName: TFSec Scanning
     steps:
     - task: tfsec@1
       inputs:
         version: 'v1.26.0'
         dir: './'
 - stage:
-  displayName: Initialize Terraform
+  displayName: Terraform Deployment
   jobs:
-  - job: InstallTerraform
+  - job: TerraformDeployment
+    displayName: Terraform Deployment
     steps:
     - task: TerraformInstaller@1
       inputs:
