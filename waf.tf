@@ -1,3 +1,5 @@
+#This module is necessary for ISSUE #8 - Distribution does not utilise a WAF
+
 resource "aws_wafv2_web_acl" "waf" {
   name  = "${var.name}-waf"
   scope = "REGIONAL"

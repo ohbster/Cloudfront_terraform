@@ -67,8 +67,9 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
         forward = "none"
       }
     }
-
-    viewer_protocol_policy = "allow-all"
+    # The is set to "redirect-to-https to fix ISSUE #9"
+    # ISSUE #9 - Distribution allows unencrypted communications
+    viewer_protocol_policy = "redirect-to-https"
     min_ttl                = 0
     default_ttl            = 3600
     max_ttl                = 86400
