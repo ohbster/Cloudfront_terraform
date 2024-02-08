@@ -4,7 +4,7 @@ resource "aws_wafv2_web_acl" "waf" {
   name  = "${var.name}-waf"
   scope = "CLOUDFRONT" #Choices are "CLOUDFRONT" or "REGIONAL"
   default_action {
-    block {
+    allow {
 
     }
   }
@@ -42,10 +42,3 @@ resource "aws_wafv2_web_acl" "waf" {
     }
   }
 }
-
-# resource "aws_wafv2_web_acl_association" "name" {
-#   resource_arn = aws_cloudfront_distribution.s3_distribution.arn
-#   web_acl_arn  = aws_wafv2_web_acl.waf.arn
-
-# depends_on = [ aws_cloudfront_distribution.s3_distribution ]
-# }
