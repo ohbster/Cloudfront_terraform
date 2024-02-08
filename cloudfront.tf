@@ -51,7 +51,7 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
   logging_config {
     include_cookies = false
     bucket = aws_s3_bucket.logging_bucket.bucket_domain_name
-    prefix          = "cloudfront-logs"
+    prefix          = "cloudfront-logs/"
   }
 
   aliases = ["${var.domain_name}"]

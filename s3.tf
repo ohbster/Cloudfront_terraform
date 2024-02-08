@@ -19,7 +19,8 @@ resource "aws_s3_bucket_website_configuration" "website_configuration" {
 ############################################
 # Security Enhancements for TFSec
 
-# This section is needed to allow logging | ISSUE 1
+# This section is needed to allow logging 
+# Fixes ISSUE #1
 # Create a bucket for cloudwatch logging
 resource "aws_s3_bucket" "logging_bucket" {
   force_destroy = true
@@ -34,9 +35,22 @@ resource "aws_s3_bucket_ownership_controls" "logging_oc" {
     object_ownership = "BucketOwnerPreferred"
   }
 }
+# This satisfies ISSUE #5
+# !!!WARNING!!!
+# IF YOU SEND YOUR LOGS INTO THE SAME BUCKET YOU ARE LOGGING
+# THE BUCKET SIZE WILL GROW EXPONENTIALLY AND SO WILL YOUR BILL 
+# Be careful here.
+
+resource "aws_s3_bucket_logging" "logging_bucket" {
+  bucket = aws_s3_bucket.content_bucket.id
+  target_bucket = aws_s3_bucket.logging_bucket.id
+  target_prefix = "s3-log/"
+
+}
 
 ###########################
-# Public acceess block | ISSUE #4
+# Public access block 
+# Fixes ISSUE #4
 resource "aws_s3_bucket_public_access_block" "content_public_block" {
   bucket = aws_s3_bucket.content_bucket.id
 
@@ -87,7 +101,7 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "content_sse" {
 
 #########################
 # Create Bucket versioning
-# This is fix ISSUE #6
+# Fixes ISSUE #6
 resource "aws_s3_bucket_versioning" "content_versioning" {
   bucket = aws_s3_bucket.content_bucket.id
   versioning_configuration {
