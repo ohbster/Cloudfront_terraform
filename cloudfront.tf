@@ -36,6 +36,7 @@ resource "aws_cloudfront_origin_access_control" "oac" {
 }
 
 resource "aws_cloudfront_distribution" "s3_distribution" {
+  web_acl_id = aws_wafv2_web_acl.waf.arn
   origin {
     domain_name = aws_s3_bucket.content_bucket.bucket_regional_domain_name
     origin_access_control_id = aws_cloudfront_origin_access_control.oac.id
