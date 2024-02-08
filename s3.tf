@@ -19,6 +19,30 @@ resource "aws_s3_bucket_ownership_controls" "logging_oc" {
     object_ownership = "BucketOwnerPreferred"
   }
 }
+
+#Public block | 
+resource "aws_s3_bucket_public_access_block" "content_public_block" {
+  bucket = aws_s3_bucket.content_bucket.id
+
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+
+  depends_on = [ aws_s3_bucket.content_bucket ]
+}
+resource "aws_s3_bucket_public_access_block" "logging_public_block" {
+  bucket = aws_s3_bucket.logging_bucket.id
+
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+
+  depends_on = [ aws_s3_bucket.logging_bucket ]
+}
+
+
 #This section is to enable SSE-KMS
 resource "aws_s3_bucket_server_side_encryption_configuration" "logging_sse" {
   bucket = aws_s3_bucket.logging_bucket.bucket
@@ -32,7 +56,7 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "logging_sse" {
   depends_on = [ aws_kms_key.cmk ]
 }
 
-#This section is to enable SSE-KMS
+#This section is to enable SSE-KMS | ISSUE #2 #3
 resource "aws_s3_bucket_server_side_encryption_configuration" "content_sse" {
   bucket = aws_s3_bucket.content_bucket.bucket
   rule {
