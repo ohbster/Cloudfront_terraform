@@ -9,15 +9,39 @@ resource "aws_s3_bucket" "content_bucket" {
 resource "aws_s3_bucket" "logging_bucket" {
   force_destroy = true
   bucket = "${var.name}-logging"
+  
   tags = local.common_tags
 }
 #This section is needed to allow logging | ISSUE 1
-resource "aws_s3_bucket_ownership_controls" "s3_oc" {
+resource "aws_s3_bucket_ownership_controls" "logging_oc" {
   bucket = aws_s3_bucket.logging_bucket.id
   rule {
     object_ownership = "BucketOwnerPreferred"
   }
 }
+#This section is to enable SSE-KMS
+resource "aws_s3_bucket_server_side_encryption_configuration" "logging_sse" {
+  bucket = aws_s3_bucket.logging_bucket.bucket
+  rule {
+    bucket_key_enabled = true
+  }
+}
+
+#This section is to enable SSE-KMS
+resource "aws_s3_bucket_server_side_encryption_configuration" "content_sse" {
+  bucket = aws_s3_bucket.content_bucket.bucket
+  rule {
+    bucket_key_enabled = true
+  }
+}
+
+# #This section is to enable SSE-KMS
+# resource "aws_s3_bucket_server_side_encryption_configuration" "logging_sse" {
+#   bucket = aws_s3_bucket.logging_bucket.bucket
+#   rule {
+#     bucket_key_enabled = true
+#   }
+# }
 
 # Not sure if this is needed??
 resource "aws_s3_bucket_website_configuration" "website_configuration" {
