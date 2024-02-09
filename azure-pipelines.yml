@@ -46,9 +46,16 @@ stages:
         commandOptions: '--auto-approve'
         environmentServiceNameAWS: '(Cloudfront_Terraform)AWS_for_terrafrom'
       displayName: 'Apply terraform'
+      # This bash step will retrieve the value of the distribution_id from the terraform deployment output
+      # and save it to a variable to be used in the frontend deployment
     - bash: |
         terraform show --json | jq '.values.outputs.distribution_id.value'
-        echo "##vso[task.setvariable variable=foo;isOutput=true]$foo"
+        echo "##vso[task.setvariable variable=distribution_id;isOutput=true]$distribution_id"
+      name: GetDistributionId
+    - bash: |
+        az pipelines variable-group variable update --group-id Cloudfront_Terraform --name distribution-id --value=$(GetDistibutionId.distribution_id)
+      name: UpdateVariables
+    
 # - stage:
 #   displayName: SAST
 #   jobs:
