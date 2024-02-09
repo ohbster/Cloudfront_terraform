@@ -52,16 +52,6 @@ stages:
         terraform show --json | jq '.values.outputs.distribution_id.value'
         echo "##vso[task.setvariable variable=distribution_id;isOutput=true]$distribution_id"
       name: GetDistributionId
-    - bash: |
-        az pipelines variable-group variable update --group-id Cloudfront_Terraform --name distribution-id --value $GetDistributionId.distribution_id --organization "https://dev.azure.com/obijahgreaux/" --project Cloudfront_Terraform
-      name: UpdateVariables
-    
-# - stage:
-#   displayName: SAST
-#   jobs:
-#   - job: SecurityScan    
-#     steps:
-#     - task: tfsec@1
-#       inputs:
-#         version: 'v1.26.0'
-#         debug: true
+    # - bash: |
+    #     az pipelines variable-group variable update --group-id Cloudfront_Terraform --name distribution-id --value $GetDistributionId.distribution_id --organization "https://dev.azure.com/obijahgreaux/" --project Cloudfront_Terraform
+    #   name: UpdateVariables
