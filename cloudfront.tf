@@ -7,9 +7,9 @@
 -custom SSL certificate
 -Add Alternate domain name(CNAME)
 -allowed HTTP methods (GET,HEAD)
-cache policy and origin 
+-cache policy and origin 
 cachingOptimized
-price class(NA and EU only)
+-price class(NA and EU only)
 Supported HTTP (HTTP/2)
 IPv6 off
 
@@ -26,6 +26,7 @@ locals {
     s3_origin_id = "someS3Origin"
 }
 
+#Explore using origin access ID instead.
 resource "aws_cloudfront_origin_access_control" "oac" {
   name                              = "${var.name}-oac"
   description                       = "Example Policy"
@@ -35,6 +36,7 @@ resource "aws_cloudfront_origin_access_control" "oac" {
 }
 
 resource "aws_cloudfront_distribution" "s3_distribution" {
+  web_acl_id = aws_wafv2_web_acl.waf.arn
   origin {
     domain_name = aws_s3_bucket.content_bucket.bucket_regional_domain_name
     origin_access_control_id = aws_cloudfront_origin_access_control.oac.id
@@ -46,11 +48,11 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
   comment             = "Some comment"
   default_root_object = "index.html"
 
-  # logging_config {
-  #   include_cookies = false
-  #   bucket = aws_s3_bucket.logging_bucket.bucket_domain_name
-  #   prefix          = "cloudfront-logs"
-  # }
+  logging_config {
+    include_cookies = false
+    bucket = aws_s3_bucket.logging_bucket.bucket_domain_name
+    prefix          = "cloudfront-logs/"
+  }
 
   aliases = ["${var.domain_name}"]
 
@@ -66,8 +68,9 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
         forward = "none"
       }
     }
-
-    viewer_protocol_policy = "allow-all"
+    # The is set to "redirect-to-https to fix ISSUE #9"
+    # ISSUE #9 - Distribution allows unencrypted communications
+    viewer_protocol_policy = "redirect-to-https"
     min_ttl                = 0
     default_ttl            = 3600
     max_ttl                = 86400
@@ -88,10 +91,6 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
     acm_certificate_arn = aws_acm_certificate.certificate.arn
     ssl_support_method = "sni-only"
     minimum_protocol_version = "TLSv1.2_2021"
-  }
-
-  provisioner "local-exec" {
-    command = "aws cloudfront create-invalidation --distribution-id ${self.id} --paths '/*'"
   }
 
   depends_on = [ aws_s3_bucket.content_bucket,aws_s3_bucket.logging_bucket,aws_acm_certificate.certificate ]

@@ -12,9 +12,20 @@ pool:
 stages:
 
 - stage:
-  displayName: Initialize Terraform
+  displayName: Security Scanning
   jobs:
-  - job: InstallTerraform
+  - job:
+    displayName: TFSec Scanning
+    steps:
+    - task: tfsec@1
+      inputs:
+        version: 'v1.26.0'
+        dir: './'
+- stage:
+  displayName: Terraform Deployment
+  jobs:
+  - job: TerraformDeployment
+    displayName: Terraform Deployment
     steps:
     - task: TerraformInstaller@1
       inputs:
@@ -35,12 +46,20 @@ stages:
         commandOptions: '--auto-approve'
         environmentServiceNameAWS: '(Cloudfront_Terraform)AWS_for_terrafrom'
       displayName: 'Apply terraform'
-# - stage:
-#   displayName: SAST
-#   jobs:
-#   - job: SecurityScan    
-#     steps:
-#     - task: tfsec@1
-#       inputs:
-#         version: 'v1.26.0'
-#         debug: true
+      # This bash step will retrieve the value of the distribution_id from the terraform deployment output
+      # and save it to a variable to be used in the frontend deployment
+    - bash: |
+        terraform show --json | jq '.values.outputs.distribution_id.value'
+        echo "##vso[task.setvariable variable=distribution_id;isOutput=true]$(distribution_id)" 
+        echo $(terraform show --json | jq -r '.values.outputs.distribution_id.value')> $(Build.ArtifactStagingDirectory)/pipeline.env
+
+
+      name: GetDistributionId
+    - task: PublishBuildArtifacts@1
+      inputs:
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+        ArtifactName: 'variables'
+        publishLocation: 'Container'
+    # - bash: |
+    #     az pipelines variable-group variable update --group-id Cloudfront_Terraform --name distribution-id --value $GetDistributionId.distribution_id --organization "https://dev.azure.com/obijahgreaux/" --project Cloudfront_Terraform
+    #   name: UpdateVariables
