@@ -110,7 +110,7 @@ resource "aws_s3_bucket_policy" "policy" {
                 "Principal": {
                     "Service": "cloudfront.amazonaws.com"
                 },
-                "Action": "s3:GetObject",
+                "Action": ["s3:GetObject","kms:Decrypt"],
                 "Resource": "${aws_s3_bucket.content_bucket.arn}/*",
                 "Condition": {
                     "StringEquals": {
