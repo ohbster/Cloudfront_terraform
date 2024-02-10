@@ -28,10 +28,12 @@ stages:
   - job: TerraformDeployment
     displayName: Terraform Deployment
     steps:
+    # Install terraform to agent
     - task: TerraformInstaller@1
       inputs:
         terraformVersion: 'latest'
       displayName: 'Install terraform'
+    # terraform init
     - task: TerraformTaskV4@4
       inputs:
         provider: 'aws'
@@ -40,6 +42,7 @@ stages:
         backendAWSBucketName: 'ohbster-ado-terraform-class5'
         backendAWSKey: 'cloudfront/terraform.tfstate'
       displayName: 'Initialize terraform'
+    # terraform apply --auto-approve
     - task: TerraformTaskV4@4
       inputs:
         provider: 'aws'
@@ -47,20 +50,17 @@ stages:
         commandOptions: '--auto-approve'
         environmentServiceNameAWS: '(Cloudfront_Terraform)AWS_for_terrafrom'
       displayName: 'Apply terraform'
-    # Artifacts
     
-    # This bash step will retrieve the value of the distribution_id from the terraform deployment output
-    # and save it to a variable to be used in the frontend deployment
+    # Artifacts
+    # This bash step will retrieve the values of the distribution_id and bucket_name from the terraform deployment output
+    # and save it to a file to be used in the frontend deployment
     - bash: |
         echo $(terraform show --json | jq -r '.values.outputs.bucket_name.value')> $(Build.ArtifactStagingDirectory)/bucket.env
         echo $(terraform show --json | jq -r '.values.outputs.distribution_id.value')> $(Build.ArtifactStagingDirectory)/pipeline.env
-
-      name: GetDistributionId
+      name: GetValues
     - task: PublishBuildArtifacts@1
       inputs:
         PathtoPublish: '$(Build.ArtifactStagingDirectory)'
         ArtifactName: 'variables'
         publishLocation: 'Container'
-    # - bash: |
-    #     az pipelines variable-group variable update --group-id Cloudfront_Terraform --name distribution-id --value $GetDistributionId.distribution_id --organization "https://dev.azure.com/obijahgreaux/" --project Cloudfront_Terraform
-    #   name: UpdateVariables
+   

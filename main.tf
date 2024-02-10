@@ -13,14 +13,14 @@ provider "aws" {
 # Terraform statefile bucket
 terraform {
   backend "s3" {
-    bucket = "ohbster-ado-terraform-class5"
+    bucket = "ohbster-ado-terraform-class5" # Change this to your own terraform state s3 bucket
     key    = "cloudfront/terraform.tfstate"
     region = "us-east-1"
   }
 }
 
-#Extra
-#This is used by resource tags. This is will identify all resources that belong to the terraform deployment
+# Extra stuff. Not really necessary. you can ignore this
+# This is used by resource tags. This is will identify all resources that belong to the terraform deployment
 resource "random_uuid" "uuid" {
 }
 

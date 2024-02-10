@@ -14,7 +14,7 @@ resource "aws_kms_alias" "cmk_alias" {
 
 }
 
-# Create a policy to only allow cloudfront access to the key
+# Create a policy to allow cloudfront access to the key
 data "aws_caller_identity" "current" {}
 locals {
   account_id = data.aws_caller_identity.current.account_id
