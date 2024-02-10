@@ -41,7 +41,7 @@ resource "aws_s3_bucket_policy" "policy" {
 
 # This section is needed to allow logging 
 # Satisfy ISSUE #1
-# Create a bucket for cloudwatch logging
+# Create a bucket for cloudwatch logging. Also add an tfsec exception to not log this bucket
 resource "aws_s3_bucket" "logging_bucket" { #tfsec:ignore:aws-s3-enable-bucket-logging
   force_destroy = true
   bucket        = "${var.name}-logging"
