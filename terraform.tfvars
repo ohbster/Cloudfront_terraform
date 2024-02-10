@@ -25,4 +25,4 @@ common_tags = {
 
 #domain name
 domain_name = "www.goldwatch.tv"
-zone_name = "goldwatch.tv"
+zone_name   = "goldwatch.tv"

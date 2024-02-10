@@ -12,12 +12,12 @@ variable "name" {
 }
 
 variable "domain_name" {
-  type = string
+  type        = string
   description = "domain for ACM"
 }
 
 variable "zone_name" {
-  type = string
+  type        = string
   description = "Hosted Zone name"
 }
 variable "regions" {

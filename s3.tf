@@ -3,76 +3,40 @@
 # Create a bucket for the static website and content
 resource "aws_s3_bucket" "content_bucket" {
   force_destroy = true
-  bucket = "${var.name}-static"
-  tags = local.common_tags
-}
-
-# Not sure if this is needed??
-resource "aws_s3_bucket_website_configuration" "website_configuration" {
-  bucket = aws_s3_bucket.content_bucket.id
-  index_document {
-    suffix = "index.html"
-  }
-  depends_on = [ aws_s3_bucket.content_bucket ]
+  bucket        = "${var.name}-static"
+  tags          = local.common_tags
 }
 
 resource "aws_s3_bucket_policy" "policy" {
-  
+
   bucket = aws_s3_bucket.content_bucket.id
   policy = jsonencode(
     {
-        "Version": "2008-10-17",
-        "Id": "PolicyForCloudFrontPrivateContent",
-        "Statement": [
-            {
-                "Sid": "AllowCloudFrontServicePrincipal",
-                "Effect": "Allow",
-                "Principal": {
-                    "Service": "cloudfront.amazonaws.com"
-                },
-                "Action": "s3:GetObject",
-                "Resource": "${aws_s3_bucket.content_bucket.arn}/*",
-                "Condition": {
-                    "StringEquals": {
-                      "AWS:SourceArn": "${aws_cloudfront_distribution.s3_distribution.arn}"
-                      
-                    }
-                }
+      "Version" : "2008-10-17",
+      "Id" : "PolicyForCloudFrontPrivateContent",
+      "Statement" : [
+        {
+          "Sid" : "AllowCloudFrontServicePrincipal",
+          "Effect" : "Allow",
+          "Principal" : {
+            "Service" : "cloudfront.amazonaws.com"
+          },
+          "Action" : "s3:GetObject",
+          "Resource" : "${aws_s3_bucket.content_bucket.arn}/*",
+          "Condition" : {
+            "StringEquals" : {
+              "AWS:SourceArn" : "${aws_cloudfront_distribution.s3_distribution.arn}"
+
             }
-        ]
-      }
-)
-depends_on = [ aws_cloudfront_distribution.s3_distribution ]
+          }
+        }
+      ]
+    }
+  )
+  depends_on = [aws_cloudfront_distribution.s3_distribution]
 }
 
-resource "aws_s3_bucket_policy" "logging_policy" {
-  
-  bucket = aws_s3_bucket.logging_bucket.id
-  policy = jsonencode(
-    {
-        "Version": "2008-10-17",
-        "Id": "PolicyForCloudFrontPrivateContent",
-        "Statement": [
-            {
-                "Sid": "AllowCloudFrontServicePrincipal",
-                "Effect": "Allow",
-                "Principal": {
-                    "Service": "cloudfront.amazonaws.com"
-                },
-                "Action": "s3:PutObject",
-                "Resource": "${aws_s3_bucket.logging_bucket.arn}/*",
-                "Condition": {
-                    "StringEquals": {
-                      "AWS:SourceArn": "${aws_cloudfront_distribution.s3_distribution.arn}"
-                      
-                    }
-                }
-            }
-        ]
-      }
-)
-depends_on = [ aws_cloudfront_distribution.s3_distribution ]
-}
+
 
 ############################################
 # Security Enhancements for TFSec
@@ -82,8 +46,8 @@ depends_on = [ aws_cloudfront_distribution.s3_distribution ]
 # Create a bucket for cloudwatch logging
 resource "aws_s3_bucket" "logging_bucket" { #tfsec:ignore:aws-s3-enable-bucket-logging
   force_destroy = true
-  bucket = "${var.name}-logging"
-  
+  bucket        = "${var.name}-logging"
+
   tags = local.common_tags
 }
 
@@ -100,10 +64,39 @@ resource "aws_s3_bucket_ownership_controls" "logging_oc" {
 # Be careful here.
 
 resource "aws_s3_bucket_logging" "logging_bucket" {
-  bucket = aws_s3_bucket.content_bucket.id
+  bucket        = aws_s3_bucket.content_bucket.id
   target_bucket = aws_s3_bucket.logging_bucket.id
   target_prefix = "s3-log/"
 
+}
+
+resource "aws_s3_bucket_policy" "logging_policy" {
+
+  bucket = aws_s3_bucket.logging_bucket.id
+  policy = jsonencode(
+    {
+      "Version" : "2008-10-17",
+      "Id" : "PolicyForCloudFrontPrivateContent",
+      "Statement" : [
+        {
+          "Sid" : "AllowCloudFrontServicePrincipal",
+          "Effect" : "Allow",
+          "Principal" : {
+            "Service" : "cloudfront.amazonaws.com"
+          },
+          "Action" : "s3:PutObject",
+          "Resource" : "${aws_s3_bucket.logging_bucket.arn}/*",
+          "Condition" : {
+            "StringEquals" : {
+              "AWS:SourceArn" : "${aws_cloudfront_distribution.s3_distribution.arn}"
+
+            }
+          }
+        }
+      ]
+    }
+  )
+  depends_on = [aws_cloudfront_distribution.s3_distribution]
 }
 
 ###########################
@@ -117,7 +110,7 @@ resource "aws_s3_bucket_public_access_block" "content_public_block" {
   ignore_public_acls      = true
   restrict_public_buckets = true
 
-  depends_on = [ aws_s3_bucket.content_bucket ]
+  depends_on = [aws_s3_bucket.content_bucket]
 }
 resource "aws_s3_bucket_public_access_block" "logging_public_block" {
   bucket = aws_s3_bucket.logging_bucket.id
@@ -127,7 +120,7 @@ resource "aws_s3_bucket_public_access_block" "logging_public_block" {
   ignore_public_acls      = true
   restrict_public_buckets = true
 
-  depends_on = [ aws_s3_bucket.logging_bucket ]
+  depends_on = [aws_s3_bucket.logging_bucket]
 }
 
 #########################
@@ -139,10 +132,10 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "logging_sse" {
     # bucket_key_enabled = true
     apply_server_side_encryption_by_default {
       kms_master_key_id = aws_kms_key.cmk.arn
-      sse_algorithm = "aws:kms"
+      sse_algorithm     = "aws:kms"
     }
   }
-  depends_on = [ aws_kms_key.cmk ]
+  depends_on = [aws_kms_key.cmk]
 }
 
 resource "aws_s3_bucket_server_side_encryption_configuration" "content_sse" {
@@ -151,10 +144,10 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "content_sse" {
     # bucket_key_enabled = true
     apply_server_side_encryption_by_default {
       kms_master_key_id = aws_kms_key.cmk.arn
-      sse_algorithm = "aws:kms"
+      sse_algorithm     = "aws:kms"
     }
   }
-  depends_on = [ aws_kms_key.cmk ]
+  depends_on = [aws_kms_key.cmk]
 }
 
 #########################
