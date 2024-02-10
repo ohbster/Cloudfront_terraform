@@ -18,13 +18,3 @@ common_tags = {
 domain_name = "www.goldwatch.tv"
 zone_name   = "goldwatch.tv"
 
-# regions = [{
-#   region = "us-east-1"
-#   cidr   = "10.51.0.0/16"
-#   },
-#   {
-#     region = "us-west-2"
-#     cidr   = "10.52.0.0/16"
-# }]
-# region  = "us-east-1"
-# region2 = "us-west-2"

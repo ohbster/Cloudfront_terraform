@@ -20,24 +20,6 @@ variable "zone_name" {
   type        = string
   description = "Hosted Zone name"
 }
-# variable "regions" {
-#   type = list(object({
-#     region = string
-#     cidr   = string
-#   }))
-#   description = "Main regions"
-
-# }
-
-# variable "region" {
-#   type        = string
-#   description = "Main vpc region"
-# }
-
-# variable "region2" {
-#   type        = string
-#   description = "Main vpc region"
-# }
 
 variable "common_tags" {
   type        = map(string)

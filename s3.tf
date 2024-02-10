@@ -54,6 +54,7 @@ resource "aws_s3_bucket_ownership_controls" "logging_oc" {
   rule {
     object_ownership = "BucketOwnerPreferred"
   }
+  depends_on = [ aws_s3_bucket.logging_bucket ]
 }
 # This satisfies ISSUE #5
 # !!!WARNING!!!
@@ -66,6 +67,7 @@ resource "aws_s3_bucket_logging" "logging_bucket" {
   target_bucket = aws_s3_bucket.logging_bucket.id
   target_prefix = "s3-log/"
 
+  depends_on = [ aws_s3_bucket.content_bucket, aws_s3_bucket.logging_bucket ]
 }
 
 resource "aws_s3_bucket_policy" "logging_policy" {
@@ -142,7 +144,7 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "logging_sse" {
       sse_algorithm     = "aws:kms"
     }
   }
-  depends_on = [aws_kms_key.cmk]
+  depends_on = [aws_kms_key.cmk, aws_s3_bucket.logging_bucket]
 }
 
 resource "aws_s3_bucket_server_side_encryption_configuration" "content_sse" {
@@ -154,7 +156,7 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "content_sse" {
       sse_algorithm     = "aws:kms"
     }
   }
-  depends_on = [aws_kms_key.cmk]
+  depends_on = [aws_kms_key.cmk, aws_s3_bucket.content_bucket]
 }
 
 #########################
@@ -165,11 +167,13 @@ resource "aws_s3_bucket_versioning" "content_versioning" {
   versioning_configuration {
     status = "Enabled"
   }
+  depends_on = [ aws_s3_bucket.content_bucket ]
 }
 resource "aws_s3_bucket_versioning" "logging_versioning" {
   bucket = aws_s3_bucket.logging_bucket.id
   versioning_configuration {
     status = "Enabled"
   }
+  depends_on = [ aws_s3_bucket.logging_bucket ]
 }
 

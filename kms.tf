@@ -11,7 +11,7 @@ resource "aws_kms_key" "cmk" {
 resource "aws_kms_alias" "cmk_alias" {
   name          = "alias/cloudfront-terraform-cmk"
   target_key_id = aws_kms_key.cmk.id
-
+  depends_on = [ aws_kms_key.cmk ]
 }
 
 # Create a policy to allow cloudfront access to the key
@@ -58,4 +58,5 @@ resource "aws_kms_key_policy" "cmk_policy" {
       }]
     }
   )
+  depends_on = [ aws_kms_key.cmk ]
 }
