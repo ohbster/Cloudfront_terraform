@@ -16,6 +16,64 @@ resource "aws_s3_bucket_website_configuration" "website_configuration" {
   depends_on = [ aws_s3_bucket.content_bucket ]
 }
 
+resource "aws_s3_bucket_policy" "policy" {
+  
+  bucket = aws_s3_bucket.content_bucket.id
+  policy = jsonencode(
+    {
+        "Version": "2008-10-17",
+        "Id": "PolicyForCloudFrontPrivateContent",
+        "Statement": [
+            {
+                "Sid": "AllowCloudFrontServicePrincipal",
+                "Effect": "Allow",
+                "Principal": {
+                    "Service": "cloudfront.amazonaws.com"
+                },
+                "Action": "s3:GetObject",
+                "Resource": "${aws_s3_bucket.content_bucket.arn}/*",
+                "Condition": {
+                    "StringEquals": {
+                      "AWS:SourceArn": "${aws_cloudfront_distribution.s3_distribution.arn}"
+                      
+                    }
+                }
+            }
+        ]
+      }
+)
+depends_on = [ aws_cloudfront_distribution.s3_distribution ]
+}
+
+resource "aws_s3_bucket_policy" "logging_policy" {
+  
+  bucket = aws_s3_bucket.logging_bucket.id
+  policy = jsonencode(
+    {
+        "Version": "2008-10-17",
+        "Id": "PolicyForCloudFrontPrivateContent",
+        "Statement": [
+            {
+                "Sid": "AllowCloudFrontServicePrincipal",
+                "Effect": "Allow",
+                "Principal": {
+                    "Service": "cloudfront.amazonaws.com"
+                },
+                "Action": "s3:PutObject",
+                "Resource": "${aws_s3_bucket.logging_bucket.arn}/*",
+                "Condition": {
+                    "StringEquals": {
+                      "AWS:SourceArn": "${aws_cloudfront_distribution.s3_distribution.arn}"
+                      
+                    }
+                }
+            }
+        ]
+      }
+)
+depends_on = [ aws_cloudfront_distribution.s3_distribution ]
+}
+
 ############################################
 # Security Enhancements for TFSec
 
@@ -114,3 +172,4 @@ resource "aws_s3_bucket_versioning" "logging_versioning" {
     status = "Enabled"
   }
 }
+
