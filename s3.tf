@@ -36,8 +36,6 @@ resource "aws_s3_bucket_policy" "policy" {
   depends_on = [aws_cloudfront_distribution.s3_distribution]
 }
 
-
-
 ############################################
 # Security Enhancements for TFSec
 
@@ -60,7 +58,7 @@ resource "aws_s3_bucket_ownership_controls" "logging_oc" {
 # This satisfies ISSUE #5
 # !!!WARNING!!!
 # IF YOU SEND YOUR LOGS INTO THE SAME BUCKET YOU ARE LOGGING
-# THE BUCKET SIZE WILL GROW EXPONENTIALLY AND SO WILL YOUR BILL 
+# THE BUCKET SIZE WILL GROW INFINITELY AND SO WILL YOUR BILL 
 # Be careful here.
 
 resource "aws_s3_bucket_logging" "logging_bucket" {
@@ -92,6 +90,15 @@ resource "aws_s3_bucket_policy" "logging_policy" {
 
             }
           }
+        },
+        {
+          "Sid" : "AllowS3ServicePrincipal",
+          "Effect" : "Allow",
+          "Principal" : {
+            "Service" : "logging.s3.amazonaws.com"
+          },
+          "Action" : "s3:PutObject",
+          "Resource" : "${aws_s3_bucket.logging_bucket.arn}/*",
         }
       ]
     }

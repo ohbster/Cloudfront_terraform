@@ -10,7 +10,7 @@ pool:
   vmImage: ubuntu-latest
 
 stages:
-
+# TFSec Security Scanner
 - stage:
   displayName: Security Scanning
   jobs:
@@ -21,6 +21,7 @@ stages:
       inputs:
         version: 'v1.26.0'
         dir: './'
+# Terraform 
 - stage:
   displayName: Terraform Deployment
   jobs:
@@ -46,13 +47,13 @@ stages:
         commandOptions: '--auto-approve'
         environmentServiceNameAWS: '(Cloudfront_Terraform)AWS_for_terrafrom'
       displayName: 'Apply terraform'
-      # This bash step will retrieve the value of the distribution_id from the terraform deployment output
-      # and save it to a variable to be used in the frontend deployment
+    # Artifacts
+    
+    # This bash step will retrieve the value of the distribution_id from the terraform deployment output
+    # and save it to a variable to be used in the frontend deployment
     - bash: |
-        terraform show --json | jq '.values.outputs.distribution_id.value'
-        echo "##vso[task.setvariable variable=distribution_id;isOutput=true]$(distribution_id)" 
+        echo $(terraform show --json | jq -r '.values.outputs.bucket_name.value')> $(Build.ArtifactStagingDirectory)/bucket.env
         echo $(terraform show --json | jq -r '.values.outputs.distribution_id.value')> $(Build.ArtifactStagingDirectory)/pipeline.env
-
 
       name: GetDistributionId
     - task: PublishBuildArtifacts@1
